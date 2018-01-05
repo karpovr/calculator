@@ -16,7 +16,7 @@
         margin-left: auto;
         margin-right: auto;
         width: 350px;
-        border: 1px dotted gray;
+        border: 2px solid lightgray;
         border-radius: 10px;
         padding: 20px;
       }
@@ -28,7 +28,7 @@
         width: 100%;
       }
       #table td {
-        padding: 3px;
+        padding: 5px;
       }
       #expression {
         width: 100%;
@@ -123,7 +123,7 @@
       function calculate() {
         var result;
         try {
-          result = eval(expression.value) || "";
+          result = eval(expression.value) || 0;
         } catch (error) {
           result = "Ошибка!";
         }
