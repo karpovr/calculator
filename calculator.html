@@ -20,14 +20,14 @@
         border-radius: 10px;
         padding: 20px;
       }
-      #title {
+      h1 {
         font-size: 2em;
         text-align: center;
       }
-      #table {
+      table {
         width: 100%;
       }
-      #table td {
+      td {
         padding: 5px;
       }
       #expression {
@@ -44,13 +44,23 @@
         border-radius: 5px;
         background-color: #eee;
       }
+      button#equal {
+        background-color: green;
+        color: white;
+        font-weight: bold;
+      }
+      button#cancel {
+        background-color: red;
+        color: white;
+        font-weight: bold;
+      }
     </style>
   </head>
   <body>
     <div id="container">
-      <h1 id="title">Калькулятор</h1>
-      <table id="table">
+      <table id="calculator">
         <caption>
+          <h1 id="title">Калькулятор</h1>
           <input id="expression" type="text" autofocus="true"></input>
         </caption>
         <tr>
@@ -84,6 +94,10 @@
       </table>
     </div>
     <script>
+      var results = [""];
+
+      var cursor = 0;
+
       var operands = document.querySelectorAll(".operand");
 
       var expression = document.getElementById("expression");
@@ -105,10 +119,17 @@
       cancel.addEventListener("click", erase);
 
       document.addEventListener("keyup", function (event) {
+        event.preventDefault();
         if (event.which === 13) {
           calculate();
         } else if (event.which === 27) {
           erase();
+        } else if ( event.which === 38 && (0 <= cursor) ) {
+          expression.value = results[cursor];
+          if (0 < cursor) { cursor-- }
+        } else if ( event.which === 40 && (cursor <= results.length - 1) ) {
+          expression.value = results[cursor];
+          if (cursor < results.length - 1) { cursor++ }
         }
       });
 
@@ -123,7 +144,9 @@
       function calculate() {
         var result;
         try {
+          results.push(expression.value);
           result = eval(expression.value) || 0;
+          cursor = results.length - 1;
         } catch (error) {
           result = "Ошибка!";
         }
