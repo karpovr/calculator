@@ -1,0 +1,134 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>Калькулятор</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content="Калькулятор для обучения программированию"/>
+    <meta name="author" content="Гавриил Карпов"/>
+    <meta http-equiv="pragma" content="no-cache"/>
+    <meta http-equiv="cache-control" content="no-cache"/>
+    <style>
+      * {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 16px;
+      }
+      #container {
+        margin-left: auto;
+        margin-right: auto;
+        width: 350px;
+        border: 1px dotted gray;
+        border-radius: 10px;
+        padding: 20px;
+      }
+      #title {
+        font-size: 2em;
+        text-align: center;
+      }
+      #table {
+        width: 100%;
+      }
+      #table td {
+        padding: 3px;
+      }
+      #expression {
+        width: 100%;
+        min-height: 30px;
+        margin: 20px 0;
+        padding: 5px;
+        text-align: right;
+        font-size: 1.5em;
+      }
+      button {
+        width: 100%;
+        font-size: 1.5em;
+        border-radius: 5px;
+        background-color: #eee;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <h1 id="title">Калькулятор</h1>
+      <table id="table">
+        <caption>
+          <input id="expression" type="text" autofocus="true"></input>
+        </caption>
+        <tr>
+          <td width="20%"><button class="operand" id="7">7</button></td>
+          <td width="20%"><button class="operand" id="8">8</button></td>
+          <td width="20%"><button class="operand" id="9">9</button></td>
+          <td width="20%"><button class="operand" id="divide">/</button></td>
+          <td width="20%"><button class="operand" id="left-paren">(</button></td>
+        </tr>
+        <tr>
+          <td><button class="operand" id="4">4</button></td>
+          <td><button class="operand" id="5">5</button></td>
+          <td><button class="operand" id="6">6</button></td>
+          <td><button class="operand" id="multiply">*</button></td>
+          <td><button class="operand" id="right-paren">)</button></td>
+        </tr>
+        <tr>
+          <td><button class="operand" id="1">1</button></td>
+          <td><button class="operand" id="2">2</button></td>
+          <td><button class="operand" id="3">3</button></td>
+          <td><button class="operand" id="minus">-</button></td>
+          <td><button class="action" id="cancel">C</button></td>
+        </tr>
+        <tr>
+          <td><button class="operand" id="0">0</button></td>
+          <td><button class="operand" id="00">00</button></td>
+          <td><button class="operand" id="point">.</button></td>
+          <td><button class="operand" id="plus">+</button></td>
+          <td><button class="action" id="equal">=</button></td>
+        </tr>
+      </table>
+    </div>
+    <script>
+      var operands = document.querySelectorAll(".operand");
+
+      var expression = document.getElementById("expression");
+
+      var equal = document.getElementById("equal");
+
+      var cancel = document.getElementById("cancel");
+
+      operands.forEach(function (operand) {
+        operand.addEventListener("click", operandHandler);
+      });
+
+      expression.addEventListener("focusout", function () {
+        this.focus();
+      });
+
+      equal.addEventListener("click", calculate);
+
+      cancel.addEventListener("click", erase);
+
+      document.addEventListener("keyup", function (event) {
+        if (event.which === 13) {
+          calculate();
+        } else if (event.which === 27) {
+          erase();
+        }
+      });
+
+      function operandHandler () {
+        expression.value = expression.value + this.textContent;
+      }
+
+      function erase() {
+        expression.value = "";
+      }
+
+      function calculate() {
+        var result;
+        try {
+          result = eval(expression.value) || "";
+        } catch (error) {
+          result = "Ошибка!";
+        }
+        expression.value = result;
+      }
+    </script>
+  </body>
+</html>
