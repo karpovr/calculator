@@ -64,31 +64,31 @@
           <input id="expression" type="text" autofocus="true"></input>
         </caption>
         <tr>
-          <td width="20%"><button class="operand" id="7">7</button></td>
-          <td width="20%"><button class="operand" id="8">8</button></td>
-          <td width="20%"><button class="operand" id="9">9</button></td>
-          <td width="20%"><button class="operand" id="divide">/</button></td>
-          <td width="20%"><button class="operand" id="left-paren">(</button></td>
+          <td width="20%"><button class="symbol" id="7">7</button></td>
+          <td width="20%"><button class="symbol" id="8">8</button></td>
+          <td width="20%"><button class="symbol" id="9">9</button></td>
+          <td width="20%"><button class="symbol" id="divide">/</button></td>
+          <td width="20%"><button class="symbol" id="left-paren">(</button></td>
         </tr>
         <tr>
-          <td><button class="operand" id="4">4</button></td>
-          <td><button class="operand" id="5">5</button></td>
-          <td><button class="operand" id="6">6</button></td>
-          <td><button class="operand" id="multiply">*</button></td>
-          <td><button class="operand" id="right-paren">)</button></td>
+          <td><button class="symbol" id="4">4</button></td>
+          <td><button class="symbol" id="5">5</button></td>
+          <td><button class="symbol" id="6">6</button></td>
+          <td><button class="symbol" id="multiply">*</button></td>
+          <td><button class="symbol" id="right-paren">)</button></td>
         </tr>
         <tr>
-          <td><button class="operand" id="1">1</button></td>
-          <td><button class="operand" id="2">2</button></td>
-          <td><button class="operand" id="3">3</button></td>
-          <td><button class="operand" id="minus">-</button></td>
+          <td><button class="symbol" id="1">1</button></td>
+          <td><button class="symbol" id="2">2</button></td>
+          <td><button class="symbol" id="3">3</button></td>
+          <td><button class="symbol" id="minus">-</button></td>
           <td><button class="action" id="cancel">C</button></td>
         </tr>
         <tr>
-          <td><button class="operand" id="0">0</button></td>
-          <td><button class="operand" id="00">00</button></td>
-          <td><button class="operand" id="point">.</button></td>
-          <td><button class="operand" id="plus">+</button></td>
+          <td><button class="symbol" id="0">0</button></td>
+          <td><button class="symbol" id="00">00</button></td>
+          <td><button class="symbol" id="point">.</button></td>
+          <td><button class="symbol" id="plus">+</button></td>
           <td><button class="action" id="equal">=</button></td>
         </tr>
       </table>
@@ -98,7 +98,7 @@
 
       var cursor = 0;
 
-      var operands = document.querySelectorAll(".operand");
+      var symbols = document.querySelectorAll(".symbol");
 
       var expression = document.getElementById("expression");
 
@@ -106,8 +106,8 @@
 
       var cancel = document.getElementById("cancel");
 
-      operands.forEach(function (operand) {
-        operand.addEventListener("click", operandHandler);
+      symbols.forEach(function (symbol) {
+        symbol.addEventListener("click", symbolHandler);
       });
 
       expression.addEventListener("focusout", function () {
@@ -133,7 +133,7 @@
         }
       });
 
-      function operandHandler () {
+      function symbolHandler () {
         expression.value = expression.value + this.textContent;
       }
 
