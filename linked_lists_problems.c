@@ -116,14 +116,15 @@ int GetNth(node* head, int index) {
   while (head != NULL && index--) {
     head = head->next;
   }
-  assert(index <= 0);
+  assert(index == -1);
   return head->data;
 }
 
 void GetNthTest() {
+  printf("\n2. GetNth: \n");
   node* head = BuildList(3);
-  int last = GetNth(head, 1);
-  printf("\n2. GetNth: %i\n", last);
+  int nth = GetNth(head, 2);
+  printf("nth: %i\n", nth);
   DeleteList(&head);
 }
 

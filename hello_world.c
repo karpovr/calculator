@@ -1,11 +1,16 @@
 #include <stdio.h>
 
+// Функтция g(x) умножает на два
+int g(int x);
+
 int main() {
-  int i;
-  double sum;
-  for (i = 0, sum = 0; i < 100; i++) {
-    sum = sum + i + 1;
-  }
-  sum = sum / i;
-  printf("sum = %lf\n", sum);
+  int x = 1073741823;
+  int y = g(x);
+  printf("%i\n", y);
+  printf("%li\n", sizeof(int));
+  return 0;
+}
+
+int g(int x) {
+  return 2 * x;
 }
