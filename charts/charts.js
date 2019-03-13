@@ -21,8 +21,10 @@ function Chart(canvas, data) {
   var width = canvas.width;
   var previewWidth = width;
   var previewHeight = Math.floor(height / 10);
+  var frameWidth = 0.25;
 
-  this.displayChart({
+  // Preview
+  this.displayInViewport({
     x0: 0,
     y0: height,
     x1: width,
@@ -30,21 +32,24 @@ function Chart(canvas, data) {
     lineWidth: 1
   });
 
-  this.displayChart({
+  // Frame view
+  this.displayInViewport({
     x0: 0,
     y0: height - previewHeight,
     x1: width,
     y1: 0,
     lineWidth: 2,
-    start: 1,
-    end: 100
+    start: Math.floor(data.columns[0].length * (1 - frameWidth)),
+    end: data.columns[0].length,
+    labels: 5
   });
+
 }
 
 var proto = Chart.prototype;
 
 // Display chart or its part in given viewport of canvas
-proto.displayChart = function (opts) {
+proto.displayInViewport = function (opts) {
   var context = this.context,
       data = this.data,
       columns = data.columns,
@@ -56,12 +61,16 @@ proto.displayChart = function (opts) {
       start = opts.start || 1,
       end = opts.end || totalPoints,
       lineWidth = opts.lineWidth || 1,
+      labels = opts.labels || 0,
       viewportWidth = x1 - x0,
       viewportHeight = y1 - y0,
+      deltaX = Math.floor(totalPoints / viewportWidth) || 1,
       extremes = {
         minY: Infinity,
         maxY: -Infinity
       };
+
+  context.clearRect(x0, y0, viewportWidth, viewportHeight);
 
   // Calculate extremes & ratios for given data range & viewport
   for (var columnIndex = 0, column; (column = columns[columnIndex]); columnIndex++) {
@@ -69,47 +78,57 @@ proto.displayChart = function (opts) {
     if (column_key === "x") { continue; }
     var minY = Infinity,
         maxY = -Infinity;
-    for (var i = start; i <= end; i++) {
+    for (var i = start; i <= end && i <= totalPoints; i++) {
       var value = column[i];
       minY = value < minY ? value : minY;
       maxY = value > maxY ? value : maxY;
     }
     extremes[column_key] = [minY, maxY];
-    extremes.minX = columns[0][1];
+    extremes.minX = columns[0][start];
     extremes.maxX = columns[0][i-1];
     extremes.minY = minY < extremes.minY ? minY : extremes.minY;
     extremes.maxY = maxY > extremes.maxY ? maxY : extremes.maxY;
     extremes.xRatio = viewportWidth / (extremes.maxX - extremes.minX);
     extremes.yRatio = viewportHeight / extremes.maxY;
   }
+  console.log(extremes);
+
+  context.save();
+  context.setTransform(extremes.xRatio, 0, 0, extremes.yRatio, -extremes.minX * extremes.xRatio, -extremes.maxY * extremes.yRatio + y1);
+  for (var i = 0; i < labels; i++) {
+    context.beginPath();
+    var xa = extremes.minX;
+    var xb = extremes.maxX;
+    var ya = extremes.maxY / (i + 1);
+    var yb = extremes.maxY / (i + 1);
+    context.moveTo( extremes.minX, extremes.maxY / (i + 1) );
+    context.lineTo( extremes.maxX, extremes.maxY / (i + 1) );
+  }
+  context.restore();
+  context.strokeStyle = '#eee';
+  context.lineWidth = 1;
+  context.stroke();
 
   // Display chart for given data range
   for (var columnIndex = 0, column; (column = columns[columnIndex]); columnIndex++) {
     var column_key = column[0];
     if (column_key === "x") { continue; }
+    context.save();
+    context.setTransform(extremes.xRatio, 0, 0, extremes.yRatio, -extremes.minX * extremes.xRatio, -extremes.maxY * extremes.yRatio + y1);
+    context.beginPath();
+    var x = columns[0][start];
+    var y = column[start];
+    context.moveTo(x, y);
+    for (var i = start; i <= end && i <= totalPoints; i += deltaX) {
+      x = columns[0][i];
+      y = column[i];
+      context.lineTo(x, y);
+    }
+    context.restore();
     context.strokeStyle = data.colors[column_key];
     context.lineWidth = lineWidth;
-    context.beginPath();
-    var xBegin = columns[0][1];
-    var yBegin = column[1];
-    var translatedBegin = translate(xBegin, yBegin, extremes.xRatio, extremes.yRatio, -extremes.minX * extremes.xRatio, -extremes.maxY * extremes.yRatio + y1);
-    context.moveTo(translatedBegin[0], translatedBegin[1]);
-    for (var i = start; i <= end; i++) {
-      var x = columns[0][i];
-      var y = column[i];
-      var translated = translate(x, y, extremes.xRatio, extremes.yRatio, -extremes.minX * extremes.xRatio, -extremes.maxY * extremes.yRatio + y1);
-      context.lineTo(translated[0], translated[1]);
-    }
     context.stroke();
   }
-
-  console.log(extremes);
-}
-
-function translate(x, y, xRatio, yRatio, dx, dy) {
-  var x1 = x * xRatio + dx;
-  var y1 = y * yRatio + dy;
-  return [x1, y1];
 }
 
 function zip() {
