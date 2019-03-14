@@ -98,22 +98,21 @@ proto.displayInViewport = function (opts) {
   var labelStep = Math.round( (extremes.maxY - extremes.minY) / labels);
   var power = Math.abs(labelStep).toString().length - 1;
   labelStep = Math.round( labelStep / Math.pow(10, power) ) * Math.pow(10, power);
-  var i = 0;
-  while ( Math.round(extremes.minY / labelStep) * labelStep + i * labelStep < extremes.maxY) {
+  var yLine = Math.round(extremes.minY / labelStep) * labelStep;
+  while ( yLine < extremes.maxY) {
     context.save();
     context.setTransform(extremes.xRatio, 0, 0, extremes.yRatio, -extremes.minX * extremes.xRatio, -extremes.maxY * extremes.yRatio + y1);
     context.beginPath();
-    var xa = extremes.minX;
-    var ya = Math.round(extremes.minY / labelStep) * labelStep + i * labelStep;
-    var xb = extremes.maxX;
-    var yb = ya;
-    context.moveTo( xa, ya );
-    context.lineTo( xb, yb );
+    var xBeg = extremes.minX;
+    var xEnd = extremes.maxX;
+    context.moveTo( xBeg, yLine );
+    context.lineTo( xEnd, yLine );
     context.restore();
     context.stroke();
-    var textPoint = transform(xa, ya, extremes.xRatio, extremes.yRatio, -extremes.minX * extremes.xRatio, -extremes.maxY * extremes.yRatio + y1);
-    context.fillText(ya, textPoint[0], textPoint[1] - 8);
+    var textPoint = transform(xBeg, yLine, extremes.xRatio, extremes.yRatio, -extremes.minX * extremes.xRatio, -extremes.maxY * extremes.yRatio + y1);
+    context.fillText(yLine, textPoint[0], textPoint[1] - 8);
     i++;
+    yLine = yLine + labelStep;
   }
   context.restore();
 
