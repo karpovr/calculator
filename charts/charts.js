@@ -34,7 +34,7 @@ function Chart(canvas, data) {
   // Frame view
   this.displayInViewport({
     x0: 0,
-    y0: height - 2 * previewHeight,
+    y0: height - previewHeight,
     x1: width,
     y1: 0,
     lineWidth: 2,
@@ -111,7 +111,6 @@ proto.displayInViewport = function (opts) {
     context.stroke();
     var textPoint = transform(xBeg, yLine, extremes.xRatio, extremes.yRatio, -extremes.minX * extremes.xRatio, -extremes.maxY * extremes.yRatio + y1);
     context.fillText(yLine, textPoint[0], textPoint[1] - 8);
-    i++;
     yLine = yLine + labelStep;
   }
   context.restore();
@@ -138,7 +137,7 @@ proto.displayInViewport = function (opts) {
     context.stroke();
   }
   context.restore();
-}
+};
 
 function transform(x, y, xRatio, yRatio, xOffset, yOffset) {
   return [
