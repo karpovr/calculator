@@ -38,11 +38,8 @@ function Chart(canvas, data) {
     x1: width,
     y1: 0,
     lineWidth: 2,
-    //start: Math.floor(data.columns[0].length * (1 - frameWidth)),
-    //end: data.columns[0].length,
     labels: 5
   });
-
 }
 
 var proto = Chart.prototype;
@@ -99,13 +96,15 @@ proto.displayInViewport = function (opts) {
   context.fillStyle = '#aaa';
   context.lineWidth = 1;
   var labelStep = Math.round( (extremes.maxY - extremes.minY) / labels);
-  labelStep = labelStep.toString();
-  for (var i = 0; i < labels; i++) {
+  var power = Math.abs(labelStep).toString().length - 1;
+  labelStep = Math.round( labelStep / Math.pow(10, power) ) * Math.pow(10, power);
+  var i = 0;
+  while ( Math.round(extremes.minY / labelStep) * labelStep + i * labelStep < extremes.maxY) {
     context.save();
     context.setTransform(extremes.xRatio, 0, 0, extremes.yRatio, -extremes.minX * extremes.xRatio, -extremes.maxY * extremes.yRatio + y1);
     context.beginPath();
     var xa = extremes.minX;
-    var ya = extremes.minY + i * labelStep;
+    var ya = Math.round(extremes.minY / labelStep) * labelStep + i * labelStep;
     var xb = extremes.maxX;
     var yb = ya;
     context.moveTo( xa, ya );
@@ -114,6 +113,7 @@ proto.displayInViewport = function (opts) {
     context.stroke();
     var textPoint = transform(xa, ya, extremes.xRatio, extremes.yRatio, -extremes.minX * extremes.xRatio, -extremes.maxY * extremes.yRatio + y1);
     context.fillText(ya, textPoint[0], textPoint[1] - 8);
+    i++;
   }
   context.restore();
 
