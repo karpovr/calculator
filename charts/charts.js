@@ -21,7 +21,6 @@ function Chart(canvas, data) {
   var width = canvas.width;
   var previewWidth = width;
   var previewHeight = Math.floor(height / 10);
-  var frameWidth = 0.25;
 
   // Preview
   this.displayInViewport({
@@ -35,12 +34,12 @@ function Chart(canvas, data) {
   // Frame view
   this.displayInViewport({
     x0: 0,
-    y0: height - previewHeight,
+    y0: height - 2 * previewHeight,
     x1: width,
     y1: 0,
     lineWidth: 2,
-    start: Math.floor(data.columns[0].length * (1 - frameWidth)),
-    end: data.columns[0].length,
+    //start: Math.floor(data.columns[0].length * (1 - frameWidth)),
+    //end: data.columns[0].length,
     labels: 5
   });
 
@@ -76,9 +75,9 @@ proto.displayInViewport = function (opts) {
   for (var columnIndex = 0, column; (column = columns[columnIndex]); columnIndex++) {
     var column_key = column[0];
     if (column_key === "x") { continue; }
-    var minY = Infinity,
-        maxY = -Infinity;
-    for (var i = start; i <= end && i <= totalPoints; i++) {
+    var minY = 0,
+        maxY = 0;
+    for (var i = start; i <= end && i <= totalPoints; i += deltaX) {
       var value = column[i];
       minY = value < minY ? value : minY;
       maxY = value > maxY ? value : maxY;
@@ -89,27 +88,37 @@ proto.displayInViewport = function (opts) {
     extremes.minY = minY < extremes.minY ? minY : extremes.minY;
     extremes.maxY = maxY > extremes.maxY ? maxY : extremes.maxY;
     extremes.xRatio = viewportWidth / (extremes.maxX - extremes.minX);
-    extremes.yRatio = viewportHeight / extremes.maxY;
+    extremes.yRatio = viewportHeight / (extremes.maxY - extremes.minY);
   }
   console.log(extremes);
 
+  // Draw labels
   context.save();
-  context.setTransform(extremes.xRatio, 0, 0, extremes.yRatio, -extremes.minX * extremes.xRatio, -extremes.maxY * extremes.yRatio + y1);
+  context.font = "12px sans-serif";
+  context.strokeStyle = '#eee';
+  context.fillStyle = '#aaa';
+  context.lineWidth = 1;
+  var labelStep = Math.round( (extremes.maxY - extremes.minY) / labels);
+  labelStep = labelStep.toString();
   for (var i = 0; i < labels; i++) {
+    context.save();
+    context.setTransform(extremes.xRatio, 0, 0, extremes.yRatio, -extremes.minX * extremes.xRatio, -extremes.maxY * extremes.yRatio + y1);
     context.beginPath();
     var xa = extremes.minX;
+    var ya = extremes.minY + i * labelStep;
     var xb = extremes.maxX;
-    var ya = extremes.maxY / (i + 1);
-    var yb = extremes.maxY / (i + 1);
-    context.moveTo( extremes.minX, extremes.maxY / (i + 1) );
-    context.lineTo( extremes.maxX, extremes.maxY / (i + 1) );
+    var yb = ya;
+    context.moveTo( xa, ya );
+    context.lineTo( xb, yb );
+    context.restore();
+    context.stroke();
+    var textPoint = transform(xa, ya, extremes.xRatio, extremes.yRatio, -extremes.minX * extremes.xRatio, -extremes.maxY * extremes.yRatio + y1);
+    context.fillText(ya, textPoint[0], textPoint[1] - 8);
   }
   context.restore();
-  context.strokeStyle = '#eee';
-  context.lineWidth = 1;
-  context.stroke();
 
-  // Display chart for given data range
+  // Display data range in given viewport
+  context.save();
   for (var columnIndex = 0, column; (column = columns[columnIndex]); columnIndex++) {
     var column_key = column[0];
     if (column_key === "x") { continue; }
@@ -129,6 +138,14 @@ proto.displayInViewport = function (opts) {
     context.lineWidth = lineWidth;
     context.stroke();
   }
+  context.restore();
+}
+
+function transform(x, y, xRatio, yRatio, xOffset, yOffset) {
+  return [
+    x * xRatio + xOffset,
+    y * yRatio + yOffset
+  ];
 }
 
 function zip() {
