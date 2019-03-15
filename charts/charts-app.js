@@ -94,13 +94,13 @@ function ChartsApp() {
     chartsContainer.innerHTML = "";
     var width = 350;
     var height = 500;
-    data.forEach(function (dataItem) {
+    data.forEach(function (item) {
       var canvas = document.createElement("canvas");
       canvas.width = width;
       canvas.height = height;
       canvas.className = "chart";
       chartsContainer.appendChild(canvas);
-      var chart = new Chart(canvas, dataItem);
+      var chart = new Chart(item, canvas);
     });
   }
 }
