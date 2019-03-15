@@ -28,17 +28,20 @@ function Chart(canvas, data) {
     y0: height,
     x1: width,
     y1: height - previewHeight,
-    lineWidth: 1
+    lineWidth: 1,
+    preview: true
   });
 
   // Frame view
   this.displayInViewport({
     x0: 0,
-    y0: height - previewHeight,
+    y0: height - 2 * previewHeight,
     x1: width,
     y1: 0,
     lineWidth: 2,
-    labels: 5
+    labels: 5,
+    start: data.columns[0].length - (data.columns[0].length >> 2),
+    end: data.columns[0].length
   });
 }
 
@@ -92,8 +95,9 @@ proto.displayInViewport = function (opts) {
   // Draw labels
   context.save();
   context.font = "12px sans-serif";
-  context.strokeStyle = '#eee';
-  context.fillStyle = '#aaa';
+  context.textBaseline = "bottom";
+  context.strokeStyle = "#eee";
+  context.fillStyle = "#aaa";
   context.lineWidth = 1;
   var labelStep = Math.round( (extremes.maxY - extremes.minY) / labels);
   var power = Math.abs(labelStep).toString().length - 1;
@@ -110,7 +114,7 @@ proto.displayInViewport = function (opts) {
     context.restore();
     context.stroke();
     var textPoint = transform(xBeg, yLine, extremes.xRatio, extremes.yRatio, -extremes.minX * extremes.xRatio, -extremes.maxY * extremes.yRatio + y1);
-    context.fillText(yLine, textPoint[0], textPoint[1] - 8);
+    context.fillText(yLine, textPoint[0], textPoint[1] - 5);
     yLine = yLine + labelStep;
   }
   context.restore();
