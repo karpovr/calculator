@@ -76,7 +76,7 @@ Chart.prototype.getExtremes = function (start, finish) {
 };
 
 // Display chart or its part in given viewport of canvas
-proto.displayInViewport = function (opts) {
+Chart.prototype.displayInViewport = function (opts) {
   var context = this.context,
       data = this.data,
       columns = data.columns,
