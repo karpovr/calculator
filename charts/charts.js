@@ -45,7 +45,35 @@ function Chart(canvas, data) {
   });
 }
 
-var proto = Chart.prototype;
+// Calculate extremes for given data range
+Chart.prototype.getExtremes = function (start, finish) {
+  var i,
+      j,
+      column,
+      column_key,
+      value,
+      minY,
+      maxY,
+      extremes = {};
+
+  for (i = 0, column; (column = this.data.columns[i]); i++) {
+    column_key = column[0];
+    if (column_key === "x") { continue; }
+    minY = maxY = 0;
+    for (j = start; j <= finish; i += deltaX) {
+      var value = column[i];
+      minY = value < minY ? value : minY;
+      maxY = value > maxY ? value : maxY;
+    }
+    extremes[column_key] = [minY, maxY];
+    extremes.minX = columns[0][start];
+    extremes.maxX = columns[0][i-1];
+    extremes.minY = minY < extremes.minY ? minY : extremes.minY;
+    extremes.maxY = maxY > extremes.maxY ? maxY : extremes.maxY;
+    extremes.xRatio = viewportWidth / (extremes.maxX - extremes.minX);
+    extremes.yRatio = viewportHeight / (extremes.maxY - extremes.minY);
+  }
+};
 
 // Display chart or its part in given viewport of canvas
 proto.displayInViewport = function (opts) {
