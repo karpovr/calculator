@@ -18,9 +18,9 @@ function Chart(data, canvas) {
 
   var settings = {};
   settings.displayed = Object.keys(data.names);
-  settings.totalPoints = data.columns[0].length - 1;
-  settings.begin = settings.totalPoints - (settings.totalPoints >> 2),
-  settings.end = settings.totalPoints,
+  settings.total = data.columns[0].length - 1;
+  settings.begin = settings.total - (settings.total >> 2);
+  settings.end = settings.total;
   settings.preview = {
     x0: 0,
     y0: canvas.height,
@@ -47,58 +47,22 @@ function Chart(data, canvas) {
 
 Chart.prototype.draw = function () {
   // Preview
-  //this.drawPreview();
-  this.displayInViewport(this.settings.preview);
+  this.clearView(this.settings.preview);
+  this.renderView(this.settings.preview, 1, this.settings.total);
 
   // Frame view
-  this.displayInViewport(this.settings.view);
-};
-
-Chart.prototype.drawPreview = function () {
-
-  var context = this.context;
-  var begin = 1;
-  var end = this.settings.totalPoints;
-  var extremes = this.getExtremes(begin, end);
-  var xRatio = this.settings.preview.width / extremes.xDelta;
-  var yRatio = this.settings.preview.height / extremes.yDelta;
-  var xOffset = -extremes.minX * xRatio;
-  var yOffset = extremes.maxY * yRatio + this.settings.preview.y1;
-  var xStep = Math.floor( (end - begin) / this.settings.preview.width ) || 1;
-
-  context.save();
-  context.lineWidth = this.settings.preview.lineWidth;
-
-  var i, j, column_key, column, x0, y0, x, y;
-  for (i = 0, column; (column = this.data.columns[i]); i++) {
-    column_key = column[0];
-    if (column_key === "x" || this.settings.displayed.indexOf(column_key) < 0) {
-      continue;
-    }
-    context.strokeStyle = this.data.colors[column_key];
-    context.save();
-    context.setTransform(xRatio, 0, 0, -yRatio, xOffset, yOffset);
-    x0 = this.data.columns[0][begin];
-    y0 = column[begin];
-    context.beginPath();
-    context.moveTo(x0, y0);
-    for (j = begin; j <= end; j += xStep) {
-      x = this.data.columns[0][j];
-      y = column[j];
-      context.lineTo(x, y);
-    }
-    context.restore();
-    context.stroke();
-  }
-  context.restore();
-};
-
-Chart.prototype.drawView = function () {
+  this.clearView(this.settings.view);
+  this.drawLabels(this.settings.view, this.settings.begin, this.settings.end);
+  this.renderView(this.settings.view, this.settings.begin, this.settings.end);
 
 };
 
 // Calculate extremes for given data range
 Chart.prototype.getExtremes = function (begin, end) {
+
+  begin = typeof begin !== "undefined" ? begin : this.settings.begin;
+  end = typeof end !== "undefined" ? end : this.settings.end;
+
   var i,
       j,
       column,
@@ -106,8 +70,6 @@ Chart.prototype.getExtremes = function (begin, end) {
       value,
       minY,
       maxY,
-      begin = typeof begin !== "undefined" ? begin : this.settings.begin,
-      end = typeof end !== "undefined" ? end : this.settings.end,
       extremes = {};
 
   for (i = 0, column; (column = this.data.columns[i]); i++) {
@@ -134,29 +96,56 @@ Chart.prototype.getExtremes = function (begin, end) {
   return extremes;
 };
 
-// Display chart or its part in given viewport of canvas
-Chart.prototype.displayInViewport = function (opts) {
-  var context = this.context,
-      data = this.data,
-      columns = data.columns,
-      x0 = opts.x0,
-      x1 = opts.x1,
-      y0 = opts.y0,
-      y1 = opts.y1,
-      width = opts.width,
-      height = opts.height,
-      begin = opts.begin || 1,
-      end = opts.end || this.settings.totalPoints,
-      lineWidth = opts.lineWidth || 1,
-      labels = opts.labels || 0,
-      xStep = Math.floor( (end - begin) / width ) || 1;
+Chart.prototype.clearView = function (view) {
+  var context = this.context;
+  context.clearRect(view.x0, view.y0, view.width, -view.height);
+};
 
-  context.clearRect(x0, y0, width, -height);
+Chart.prototype.renderView = function (view, begin, end) {
 
-  // Get extremes, calculate ratios for given data range & viewport
+  var context = this.context;
   var extremes = this.getExtremes(begin, end);
-  var xRatio = width / extremes.xDelta;
-  var yRatio = height / extremes.yDelta;
+  var xRatio = view.width / extremes.xDelta;
+  var yRatio = view.height / extremes.yDelta;
+  var xOffset = -extremes.minX * xRatio;
+  var yOffset = extremes.maxY * yRatio + view.y1;
+  var xStep = Math.floor( (end - begin) / view.width ) || 1;
+
+  context.save();
+  context.lineWidth = view.lineWidth;
+
+  var i, j, column_key, column, x0, y0, x, y;
+  for (i = 0, column; (column = this.data.columns[i]); i++) {
+    column_key = column[0];
+    if (column_key === "x" || this.settings.displayed.indexOf(column_key) < 0) {
+      continue;
+    }
+    context.strokeStyle = this.data.colors[column_key];
+    context.save();
+    context.setTransform(xRatio, 0, 0, -yRatio, xOffset, yOffset);
+    x0 = this.data.columns[0][begin];
+    y0 = column[begin];
+    context.beginPath();
+    context.moveTo(x0, y0);
+    for (j = begin; j <= end; j += xStep) {
+      x = this.data.columns[0][j];
+      y = column[j];
+      context.lineTo(x, y);
+    }
+    context.restore();
+    context.stroke();
+  }
+  context.restore();
+};
+
+Chart.prototype.drawLabels = function (view, begin, end) {
+
+  var context = this.context;
+  var extremes = this.getExtremes(begin, end);
+  var xRatio = view.width / extremes.xDelta;
+  var yRatio = view.height / extremes.yDelta;
+  var xOffset = -extremes.minX * xRatio;
+  var yOffset = extremes.maxY * yRatio + view.y1;
 
   // Draw labels
   context.save();
@@ -165,47 +154,28 @@ Chart.prototype.displayInViewport = function (opts) {
   context.strokeStyle = "#eee";
   context.fillStyle = "#aaa";
   context.lineWidth = 1;
-  var labelStep = Math.round( (extremes.maxY - extremes.minY) / labels);
-  var power = Math.abs(labelStep).toString().length - 1;
-  labelStep = Math.round( labelStep / Math.pow(10, power) ) * Math.pow(10, power);
-  var yLine = Math.round(extremes.minY / labelStep) * labelStep;
-  while ( yLine < extremes.maxY) {
+  var yStep = Math.round(extremes.yDelta / view.labels);
+  var power = Math.abs(yStep).toString().length - 1;
+  yStep = Math.round( yStep / Math.pow(10, power) ) * Math.pow(10, power);
+  var y = Math.round(extremes.minY / yStep) * yStep;
+  while ( y < extremes.maxY) {
     context.save();
-    context.setTransform(xRatio, 0, 0, -yRatio, -extremes.minX * xRatio, extremes.maxY * yRatio + y1);
-    context.setTransform(xRatio, 0, 0, -yRatio, -extremes.minX * xRatio, extremes.maxY * yRatio + y1);
+    context.setTransform(xRatio, 0, 0, -yRatio, xOffset, yOffset);
     context.beginPath();
-    var xBeg = extremes.minX;
-    var xEnd = extremes.maxX;
-    context.moveTo( xBeg, yLine );
-    context.lineTo( xEnd, yLine );
+    var x0 = extremes.minX;
+    var x1 = extremes.maxX;
+    context.moveTo(x0, y);
+    context.lineTo(x1, y);
     context.restore();
-    context.stroke();
-    var labelPosition = transform(xBeg, yLine, xRatio, -yRatio, -extremes.minX * xRatio, extremes.maxY * yRatio + y1);
-    context.fillText(yLine, labelPosition[0], labelPosition[1] - 5);
-    yLine = yLine + labelStep;
-  }
-  context.restore();
-
-  // Display data range in given viewport
-  context.save();
-  for (var columnIndex = 0, column; (column = columns[columnIndex]); columnIndex++) {
-    var column_key = column[0];
-    if (column_key === "x") { continue; }
-    context.save();
-    context.setTransform(xRatio, 0, 0, -yRatio, -extremes.minX * xRatio, extremes.maxY * yRatio + y1);
-    context.beginPath();
-    var x = columns[0][begin];
-    var y = column[begin];
-    context.moveTo(x, y);
-    for (var i = begin; i <= end; i += xStep) {
-      x = columns[0][i];
-      y = column[i];
-      context.lineTo(x, y);
+    if (y === 0) {
+      context.strokeStyle = "#ccc";
+    } else {
+      context.strokeStyle = "#eee";
     }
-    context.restore();
-    context.strokeStyle = data.colors[column_key];
-    context.lineWidth = lineWidth;
     context.stroke();
+    var labelPosition = transform(x0, y, xRatio, -yRatio, xOffset, yOffset);
+    context.fillText(y, labelPosition[0], labelPosition[1] - 5);
+    y = y + yStep;
   }
   context.restore();
 };
