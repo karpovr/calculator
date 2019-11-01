@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <time.h>
 
 // DECLARATION
 
@@ -47,6 +48,8 @@ node* ShuffleMerge(node* a, node* b);
 
 node* SortedMerge(node** a, node** b);
 
+void MergeSort(node** headRef);
+
 // IMPLEMENTATION
 
 void Push(node** head, int data) {
@@ -57,9 +60,10 @@ void Push(node** head, int data) {
 }
 
 node* BuildList(int length) {
+  srand(time(NULL));
   node* head = NULL;
   while (length--) {
-    Push(&head, length);
+    Push(&head, rand() % 10);
   }
   return head;
 }
@@ -347,14 +351,15 @@ void RemoveDuplicates(node* head) {
     if (next != NULL && head->data == next->data) {
       head->next = next->next;
       free(next);
+    } else {
+      head = head->next;
     }
-    head = head->next;
   }
 }
 
 void RemoveDuplicatesTest() {
   printf("\n10. RemoveDuplicates: \n");
-  node* head = BuildList(5);
+  node* head = BuildList(15);
 
   node* node2;
   Push(&node2, 2);
@@ -365,6 +370,8 @@ void RemoveDuplicatesTest() {
   SortedInsert(&head, node3);
 
   printf("Duplicates: ");
+  MergeSort(&head);
+
   PrintList(head);
 
   RemoveDuplicates(head);
@@ -506,15 +513,15 @@ void MergeSort(node** headRef) {
 
 void MergeSortTest() {
   printf("\n15. MergeSort: \n");
-  node* head = NULL;
-  Push(&head, 12);
-  Push(&head, 912);
-  Push(&head, 2);
-  Push(&head, 1);
-  Push(&head, 10);
-  Push(&head, 8);
-  Push(&head, 13);
-  //node* head = BuildList(1000);
+  //~ node* head = NULL;
+  //~ Push(&head, 12);
+  //~ Push(&head, 912);
+  //~ Push(&head, 2);
+  //~ Push(&head, 1);
+  //~ Push(&head, 10);
+  //~ Push(&head, 8);
+  //~ Push(&head, 13);
+  node* head = BuildList(100);
   printf("original = "); PrintList(head);
   MergeSort(&head);
   printf("sorted = "); PrintList(head);
