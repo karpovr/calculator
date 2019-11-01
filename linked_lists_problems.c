@@ -5,7 +5,6 @@
 // DECLARATION
 
 typedef struct node node;
-typedef struct node* List;
 
 struct node {
   int data;
@@ -75,8 +74,8 @@ int Length(node* head) {
 }
 
 void PrintList(node* head) {
-  int i;
   printf("{");
+  int i;
   for (i = 0; head != NULL; i++) {
     printf( i == 0 ? "%i" : ", %i", head->data);
     head = head->next;
