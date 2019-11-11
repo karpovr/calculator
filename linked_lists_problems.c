@@ -63,7 +63,7 @@ node* BuildList(int length) {
   srand(time(NULL));
   node* head = NULL;
   while (length--) {
-    Push(&head, rand() % 10);
+    Push(&head, rand() % length);
   }
   return head;
 }
